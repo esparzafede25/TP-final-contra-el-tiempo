@@ -13,6 +13,8 @@ export type PlayerState =
   | 'jump'
   | 'punch1'
   | 'punch2'
+  | 'kick1'
+  | 'kick2'
   | 'kick'
   | 'jump_kick'
   | 'combo3'
@@ -162,8 +164,8 @@ export class Player extends Entity {
 
     // Do not process movement while executing ground attack animations
     if (this.isAttacking()) {
-      this.vx *= 0.8;
-      this.vz = 0;
+      this.vx = this.approach(this.vx, 0, 420 * dt);
+      this.vz = this.approach(this.vz, 0, 450 * dt);
       return;
     }
 
@@ -171,7 +173,7 @@ export class Player extends Entity {
     const speedMultiplier = this.mateSpeedTimer > 0 ? 1.45 : 1.0;
     const walkSpeed = 95 * speedMultiplier;
     const runSpeed = 160 * speedMultiplier;
-    const depthSpeed = 70 * speedMultiplier;
+    const depthSpeed = 72 * speedMultiplier;
 
     const left = input.isDown('left');
     const right = input.isDown('right');
@@ -197,18 +199,33 @@ export class Player extends Entity {
       moveZ = 1;
     }
 
-    // Apply movement
+    // Organic acceleration and friction
     const currentSpeed = isRunning ? runSpeed : walkSpeed;
-    this.vx = moveX * currentSpeed;
-    this.vz = moveZ * depthSpeed;
+    const targetVx = moveX * currentSpeed;
+    const targetVz = moveZ * depthSpeed;
+
+    const accel = isRunning ? 950 : 800;
+    const friction = 850;
+
+    if (moveX !== 0) {
+      this.vx = this.approach(this.vx, targetVx, accel * dt);
+    } else {
+      this.vx = this.approach(this.vx, 0, friction * dt);
+    }
+
+    if (moveZ !== 0) {
+      this.vz = this.approach(this.vz, targetVz, (accel * 0.8) * dt);
+    } else {
+      this.vz = this.approach(this.vz, 0, friction * dt);
+    }
 
     // Determine state
-    if (moveX !== 0 || moveZ !== 0) {
-      if (isRunning) {
+    if (Math.abs(this.vx) > 5 || Math.abs(this.vz) > 5) {
+      if (isRunning && Math.abs(this.vx) > 30) {
         this.state = 'run';
-      } else if (moveX !== 0) {
+      } else if (Math.abs(this.vx) > 5) {
         this.state = 'walk';
-      } else if (moveZ < 0) {
+      } else if (this.vz < -5) {
         this.state = 'walk_up';
       } else {
         this.state = 'walk_down';
@@ -218,60 +235,89 @@ export class Player extends Entity {
     }
   }
 
+  private approach(current: number, target: number, maxDelta: number): number {
+    if (current < target) {
+      return Math.min(current + maxDelta, target);
+    } else {
+      return Math.max(current - maxDelta, target);
+    }
+  }
+
   private startAttack(): void {
     const audio = AudioManager.getInstance();
     this.hasHitTargetThisAttack = false;
     this.currentFrameIndex = 0;
     this.animTimer = 0;
 
+    const facingDir = this.facing === 'right' ? 1 : -1;
+
     if (this.comboStep === 0 || this.attackWindowTimer <= 0) {
-      // Step 1: Jab
+      // Step 1: Piña 1 (Jab rápido)
       this.state = 'punch1';
       this.comboStep = 1;
+      this.vx = facingDir * 50; // Micro-paso cinético adelante
       this.attackHitbox = {
-        rangeX: 28,
-        toleranceZ: 16,
+        rangeX: 30,
+        toleranceZ: 18,
         damage: 10,
-        knockbackX: (this.facing === 'right' ? 30 : -30),
+        knockbackX: facingDir * 35,
         knockbackY: 0,
         isFinisher: false,
       };
       audio.playPunchLight();
     } else if (this.comboStep === 1) {
-      // Step 2: Heavy Cross
+      // Step 2: Piña 2 (Cross pesado)
       this.state = 'punch2';
       this.comboStep = 2;
+      this.vx = facingDir * 75; // Paso de avance al cruzar el golpe
       this.attackHitbox = {
-        rangeX: 32,
+        rangeX: 34,
         toleranceZ: 18,
-        damage: 15,
-        knockbackX: (this.facing === 'right' ? 60 : -60),
-        knockbackY: 20,
+        damage: 14,
+        knockbackX: facingDir * 60,
+        knockbackY: 15,
         isFinisher: false,
       };
       audio.playPunchHeavy();
     } else if (this.comboStep === 2) {
-      // Step 3: Spinning Roundhouse Finisher
-      this.state = 'combo3';
-      this.comboStep = 0;
+      // Step 3: Pata 1 (Patada media frontal)
+      this.state = 'kick1';
+      this.comboStep = 3;
+      this.vx = facingDir * 85; // Impulso con la cadera
       this.attackHitbox = {
-        rangeX: 38,
-        toleranceZ: 22,
-        damage: 25,
-        knockbackX: (this.facing === 'right' ? 160 : -160),
-        knockbackY: 120,
-        isFinisher: true,
+        rangeX: 36,
+        toleranceZ: 20,
+        damage: 18,
+        knockbackX: facingDir * 85,
+        knockbackY: 30,
+        isFinisher: false,
       };
       audio.playKick();
+    } else if (this.comboStep === 3) {
+      // Step 4: Pata 2 (Patada alta giratoria / Remate demoledor)
+      this.state = 'kick2';
+      this.comboStep = 0;
+      this.vx = facingDir * 120; // Gran avance al girar el remate
+      this.attackHitbox = {
+        rangeX: 42,
+        toleranceZ: 24,
+        damage: 26,
+        knockbackX: facingDir * 180,
+        knockbackY: 130,
+        isFinisher: true,
+      };
+      audio.playAirKick();
     }
 
-    this.attackWindowTimer = 0.55;
+    this.attackWindowTimer = 0.65;
   }
 
   public isAttacking(): boolean {
     return (
       this.state === 'punch1' ||
       this.state === 'punch2' ||
+      this.state === 'kick1' ||
+      this.state === 'kick2' ||
       this.state === 'kick' ||
       this.state === 'jump_kick' ||
       this.state === 'combo3'
@@ -289,7 +335,8 @@ export class Player extends Entity {
     if (this.state === 'run') frameDuration = 0.08;
     if (this.state === 'punch1') frameDuration = 0.07;
     if (this.state === 'punch2') frameDuration = 0.08;
-    if (this.state === 'combo3') frameDuration = 0.09;
+    if (this.state === 'kick1' || this.state === 'kick') frameDuration = 0.08;
+    if (this.state === 'kick2' || this.state === 'combo3') frameDuration = 0.09;
     if (this.state === 'jump_kick') frameDuration = 0.2;
 
     if (this.animTimer >= frameDuration) {

@@ -35,7 +35,7 @@ export class HUD {
     // Player Name / Tag
     ctx.font = 'bold 8px monospace';
     ctx.fillStyle = '#f5f6fa';
-    ctx.fillText('PROTAGONISTA (41)', 48, 18);
+    ctx.fillText('FEDE (41)', 48, 18);
 
     // Health Bar
     const barX = 48;
@@ -81,13 +81,15 @@ export class HUD {
 
     // 2. Combo Counter (if active)
     if (player.comboHits > 1) {
-      ctx.fillStyle = '#ff4757';
+      const isFinisherReady = player.comboHits >= 4;
+      ctx.fillStyle = isFinisherReady ? '#ff3838' : '#ff4757';
       ctx.font = 'bold 11px monospace';
       ctx.fillText(`¡${player.comboHits} GOLPES!`, 48, 60);
 
-      ctx.fillStyle = '#ffa502';
+      ctx.fillStyle = isFinisherReady ? '#00d2d3' : '#ffa502';
       ctx.font = 'bold 8px monospace';
-      ctx.fillText(`x${player.comboMultiplier.toFixed(1)} MULTI`, 48, 70);
+      const tagText = isFinisherReady ? '¡COMBO DEMOLEDOR!' : `x${player.comboMultiplier.toFixed(1)} MULTI`;
+      ctx.fillText(tagText, 48, 70);
     }
 
     // 3. Top-Right: Level Title & TP Progress

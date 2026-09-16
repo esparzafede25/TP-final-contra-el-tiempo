@@ -141,7 +141,7 @@ export class CutsceneScene implements Scene {
       ctx.fillStyle = '#f1c40f';
       ctx.fillText('Son las 18:00. Quedan 6 horas.', w / 2, 36);
       ctx.fillStyle = '#ffffff';
-      ctx.fillText('Abre el proyecto, pero la habitación empieza a mutar...', w / 2, 50);
+      ctx.fillText('Fede abre el proyecto, pero la habitación empieza a mutar...', w / 2, 50);
 
       // Warping psychedelic wavy lines
       ctx.strokeStyle = `hsl(${(this.timer * 100) % 360}, 80%, 50%)`;
@@ -247,7 +247,7 @@ export class CutsceneScene implements Scene {
 
       ctx.font = 'bold 8px monospace';
       ctx.fillStyle = '#747d8c';
-      ctx.fillText('El protagonista mira a cámara, agotado...', w / 2, 185);
+      ctx.fillText('Fede mira a cámara, agotado...', w / 2, 185);
     } else {
       // Cut to black
       ctx.fillStyle = '#000000';

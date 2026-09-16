@@ -245,9 +245,15 @@ export abstract class LevelScene implements Scene {
       this.isWaveLocked = true;
       this.camera.setLockBounds(currentWave.lockMinX, currentWave.lockMaxX);
 
-      // Spawn wave enemies
-      currentWave.enemies.forEach((eData) => {
+      // Spawn wave enemies with natural lateral entrance from offscreen
+      currentWave.enemies.forEach((eData, idx) => {
         const enemy = new Enemy(eData.x, eData.z, eData.type, eData.name);
+        const spawnFromRight = idx % 2 === 1 || eData.x > this.camera.x + 240;
+        const offscreenX = spawnFromRight
+          ? this.camera.x + 480 + 35 + idx * 25
+          : this.camera.x - 35 - idx * 25;
+
+        enemy.startEntrance(offscreenX, eData.z, eData.x, eData.z);
         this.enemies.push(enemy);
       });
     }

@@ -51,8 +51,8 @@ export class BossAlgoritmo extends Entity {
     super(x, z);
     this.width = 64;
     this.height = 72;
-    this.maxHealth = 350;
-    this.health = 350;
+    this.maxHealth = 220;
+    this.health = 220;
   }
 
   public updateBoss(
@@ -141,14 +141,14 @@ export class BossLista extends Entity {
   };
 
   public coreHealth: { 1: number; 2: number; 3: number } = {
-    1: 150,
-    2: 150,
-    3: 200,
+    1: 100,
+    2: 100,
+    3: 120,
   };
   public coreMaxHealth: { 1: number; 2: number; 3: number } = {
-    1: 150,
-    2: 150,
-    3: 200,
+    1: 100,
+    2: 100,
+    3: 120,
   };
 
   private attackTimer: number = 2.0;
@@ -157,8 +157,8 @@ export class BossLista extends Entity {
     super(x, z);
     this.width = 70;
     this.height = 90;
-    this.maxHealth = 500;
-    this.health = 500;
+    this.maxHealth = 320;
+    this.health = 320;
   }
 
   public override takeDamage(amount: number, knockbackX?: number, knockbackZ?: number, knockbackY?: number): void {
@@ -244,8 +244,8 @@ export class BossColapso extends Entity {
     super(x, z);
     this.width = 80;
     this.height = 100;
-    this.maxHealth = 600;
-    this.health = 600;
+    this.maxHealth = 360;
+    this.health = 360;
   }
 
   public updateBoss(player: Player, dt: number, particles: ParticleSystem): void {
@@ -258,9 +258,9 @@ export class BossColapso extends Entity {
     }
 
     // Check phase thresholds
-    if (this.health > 400) {
+    if (this.health > 240) {
       this.phase = 1;
-    } else if (this.health > 200) {
+    } else if (this.health > 120) {
       this.phase = 2;
     } else {
       this.phase = 3;
@@ -294,7 +294,7 @@ export class BossColapso extends Entity {
       this.isControlsInverted = true;
       setTimeout(() => {
         this.isControlsInverted = false;
-      }, 2500);
+      }, 1400);
 
       const dx = Math.abs(player.x - this.x);
       const dz = Math.abs(player.z - this.z);

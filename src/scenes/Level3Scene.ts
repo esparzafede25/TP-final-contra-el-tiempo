@@ -131,58 +131,131 @@ export class Level3Scene extends LevelScene {
     const w = 480;
     const h = 270;
 
-    // 1. Nocturnal rainy city skyline inspired by La Plata
-    const grad = ctx.createLinearGradient(0, 0, 0, 150);
-    grad.addColorStop(0, '#0c0b1e');
-    grad.addColorStop(0.6, '#1e1a3a');
-    grad.addColorStop(1, '#3b2042');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, 150);
+    // 1. Nocturnal rainy city skyline with lightning illumination
+    const isLightning = this.lightningTimer < 0.12;
 
-    // Parallax Cathedral silhouettes, streetlamps and neon "VENCIMIENTO" billboards
+    if (isLightning) {
+      ctx.fillStyle = '#b8e994'; // dramatic flash
+      ctx.fillRect(0, 0, w, 150);
+    } else {
+      const grad = ctx.createLinearGradient(0, 0, 0, 150);
+      grad.addColorStop(0, '#0a0918');
+      grad.addColorStop(0.6, '#181430');
+      grad.addColorStop(1, '#2f1a38');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, 150);
+    }
+
+    // Parallax Cathedral of La Plata spires & office towers
     const bgParallax = cameraX * 0.2;
 
-    for (let x = -100; x < w + 200; x += 160) {
-      const sx = ((x - bgParallax) % (w + 200) + (w + 200)) % (w + 200) - 100;
+    for (let x = -100; x < w + 220; x += 180) {
+      const sx = ((x - bgParallax) % (w + 220) + (w + 220)) % (w + 220) - 100;
 
-      // Cathedral towers & office buildings
-      ctx.fillStyle = '#100e24';
-      ctx.fillRect(sx, 20, 36, 130);
-      ctx.fillRect(sx + 36, 40, 50, 110);
-      ctx.fillRect(sx + 86, 10, 36, 140);
+      // Gothic Cathedral silhouette (La Plata style central & twin spires)
+      ctx.fillStyle = isLightning ? '#2f3640' : '#0c0a1a';
+      // Twin spires
+      ctx.beginPath();
+      ctx.moveTo(sx + 10, 148);
+      ctx.lineTo(sx + 24, 25); // spire top
+      ctx.lineTo(sx + 38, 148);
+      ctx.fill();
 
-      // Windows lit in buildings
+      // Cross atop spire
+      ctx.strokeStyle = '#f5f6fa';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sx + 24, 18);
+      ctx.lineTo(sx + 24, 26);
+      ctx.moveTo(sx + 21, 21);
+      ctx.lineTo(sx + 27, 21);
+      ctx.stroke();
+
+      // Cathedral nave & rose window
+      ctx.fillStyle = isLightning ? '#353b48' : '#0e0d20';
+      ctx.fillRect(sx + 38, 60, 50, 88);
+      // Rose window
+      ctx.fillStyle = '#9c88ff';
+      ctx.beginPath();
+      ctx.arc(sx + 63, 85, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Right tower
+      ctx.beginPath();
+      ctx.moveTo(sx + 88, 148);
+      ctx.lineTo(sx + 102, 25);
+      ctx.lineTo(sx + 116, 148);
+      ctx.fill();
+
+      // Office Building with lit windows (exhausted workers)
+      ctx.fillStyle = isLightning ? '#404552' : '#141228';
+      ctx.fillRect(sx + 120, 45, 52, 103);
+
       ctx.fillStyle = '#f1c40f';
-      for (let wy = 50; wy < 130; wy += 14) {
-        ctx.fillRect(sx + 8, wy, 4, 6);
-        ctx.fillRect(sx + 20, wy, 4, 6);
-        ctx.fillRect(sx + 50, wy, 4, 6);
+      for (let wy = 55; wy < 140; wy += 12) {
+        ctx.fillRect(sx + 126, wy, 4, 5);
+        ctx.fillRect(sx + 138, wy, 4, 5);
+        ctx.fillRect(sx + 154, wy, 4, 5);
       }
 
-      // Neon Billboard: "VENCIMIENTO" / "ARBA" / "AFIP"
-      ctx.fillStyle = '#ff3838';
-      ctx.fillRect(sx + 15, 25, 42, 14);
+      // Neon Billboard: "AFIP" / "INTIMACIÓN" / "23:59"
+      ctx.fillStyle = '#eb2f06';
+      ctx.fillRect(sx + 125, 28, 44, 14);
       ctx.strokeStyle = '#ffffff';
-      ctx.strokeRect(sx + 15, 25, 42, 14);
+      ctx.strokeRect(sx + 125, 28, 44, 14);
       ctx.font = 'bold 6px monospace';
       ctx.fillStyle = '#ffffff';
-      ctx.fillText('VENCE HOY', sx + 18, 35);
+      ctx.fillText('AFIP: 23:59', sx + 128, 38);
+    }
+
+    // Streetlamps with rain cone illumination
+    const lampParallax = cameraX * 0.7;
+    for (let x = -50; x < w + 150; x += 220) {
+      const lx = ((x - lampParallax) % (w + 150) + (w + 150)) % (w + 150) - 50;
+
+      // Lamp pole
+      ctx.strokeStyle = '#718093';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(lx, 148);
+      ctx.lineTo(lx, 80);
+      ctx.lineTo(lx + 14, 76);
+      ctx.stroke();
+
+      // Lamp light cone on sidewalk
+      const coneGrad = ctx.createRadialGradient(lx + 14, 76, 2, lx + 14, 150, 45);
+      coneGrad.addColorStop(0, 'rgba(245, 205, 121, 0.4)');
+      coneGrad.addColorStop(1, 'rgba(245, 205, 121, 0)');
+      ctx.fillStyle = coneGrad;
+      ctx.beginPath();
+      ctx.moveTo(lx + 14, 76);
+      ctx.lineTo(lx - 25, 150);
+      ctx.lineTo(lx + 55, 150);
+      ctx.closePath();
+      ctx.fill();
     }
 
     // 2. Wet asphalt street with neon reflections
-    ctx.fillStyle = '#151922';
-    ctx.fillRect(0, 150, w, h - 150);
-
-    // Street puddle reflections
-    const floorParallax = cameraX;
-    ctx.fillStyle = 'rgba(232, 65, 24, 0.2)';
-    ctx.fillRect(0, 160, w, 15);
-    ctx.fillStyle = 'rgba(0, 210, 211, 0.2)';
-    ctx.fillRect(0, 200, w, 20);
+    ctx.fillStyle = '#11141c';
+    ctx.fillRect(0, 148, w, h - 148);
 
     // Sidewalk curb
-    ctx.fillStyle = '#4b6584';
-    ctx.fillRect(0, 148, w, 4);
+    ctx.fillStyle = '#3d4a5d';
+    ctx.fillRect(0, 146, w, 4);
+
+    // Yellow dashed road lines
+    const roadParallax = cameraX;
+    ctx.fillStyle = '#f1c40f';
+    for (let x = -40; x < w + 60; x += 40) {
+      const rx = ((x - roadParallax) % 80 + 80) % 80 - 40;
+      ctx.fillRect(rx + (x % w), 205, 22, 2);
+    }
+
+    // Street puddle reflections of neon billboards
+    ctx.fillStyle = 'rgba(235, 47, 6, 0.22)';
+    ctx.fillRect(0, 158, w, 14);
+    ctx.fillStyle = 'rgba(0, 210, 211, 0.25)';
+    ctx.fillRect(0, 188, w, 18);
 
     // Draw Brain Fog Puddles (Lagunas Mentales) on the street
     for (const puddle of this.brainFogPuddles) {
@@ -203,8 +276,8 @@ export class Level3Scene extends LevelScene {
       ctx.restore();
     }
 
-    // 3. Rain overlay
-    ctx.strokeStyle = 'rgba(165, 177, 194, 0.5)';
+    // 3. Rain overlay with diagonal wind
+    ctx.strokeStyle = isLightning ? 'rgba(255, 255, 255, 0.8)' : 'rgba(165, 177, 194, 0.55)';
     ctx.lineWidth = 1;
     for (const drop of this.rainDrops) {
       ctx.beginPath();

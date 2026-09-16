@@ -74,6 +74,7 @@ export class SpriteSheetGenerator {
         frames.push(this.drawPlayerPunch2(2));
         break;
       case 'kick':
+      case 'kick1':
         frames.push(this.drawPlayerKick(0));
         frames.push(this.drawPlayerKick(1));
         frames.push(this.drawPlayerKick(2));
@@ -81,6 +82,7 @@ export class SpriteSheetGenerator {
       case 'jump_kick':
         frames.push(this.drawPlayerJumpKick());
         break;
+      case 'kick2':
       case 'combo3':
         frames.push(this.drawPlayerCombo3(0));
         frames.push(this.drawPlayerCombo3(1));
@@ -437,6 +439,28 @@ export class SpriteSheetGenerator {
       torsoLeanX: frame === 1 ? 3 : 0,
       hairFlowX: frame === 1 ? -4 : frame === 2 ? 3 : 0,
     });
+
+    // Wind slash visual effect for Pata 2 finisher
+    if (frame === 1) {
+      ctx.strokeStyle = '#00d2d3';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(42, 38, 16, -Math.PI * 0.4, Math.PI * 0.35);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(42, 38, 15, -Math.PI * 0.25, Math.PI * 0.25);
+      ctx.stroke();
+    } else if (frame === 2) {
+      ctx.strokeStyle = 'rgba(0, 210, 211, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(44, 38, 17, -Math.PI * 0.15, Math.PI * 0.3);
+      ctx.stroke();
+    }
+
     return { canvas, originX: 24, originY: 60, width: 64, height: 64 };
   }
 
