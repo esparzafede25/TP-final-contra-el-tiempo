@@ -4,7 +4,8 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   base: './', // Permite que los assets se carguen con rutas relativas en GitHub Pages
   build: {
-    outDir: 'dist',
+    outDir: 'docs',
     assetsDir: 'assets',
+    emptyOutDir: true,
   },
 });
